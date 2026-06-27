@@ -52,9 +52,16 @@ export async function getPeriodBudgets(periodId: string): Promise<UserBudget[]> 
       .where(and(eq(expenses.periodId, periodId), eq(expenses.userId, u.id)))
       .orderBy(desc(expenses.createdAt))
 
-    const infaq = calcInfaq(income)
-    const infaqDesa = calcInfaqDesa(infaq)
-    const fixedTotal = contribs.reduce((s, c) => s + c.amount, 0)
+    // Infaq: pakai nilai tersimpan bila ada (data impor dari Excel), jika tidak
+    // hitung otomatis 5% / 10% seperti biasa (bulan baru yang diisi manual).
+    const infaqRow = contribs.find((c) => c.category === "__INFAQ__")
+    const infaqDesaRow = contribs.find((c) => c.category === "__INFAQ_DESA__")
+    const infaq = infaqRow ? infaqRow.amount : calcInfaq(income)
+    const infaqDesa = infaqDesaRow ? infaqDesaRow.amount : calcInfaqDesa(infaq)
+    const fixedContribs = contribs.filter(
+      (c) => c.category !== "__INFAQ__" && c.category !== "__INFAQ_DESA__",
+    )
+    const fixedTotal = fixedContribs.reduce((s, c) => s + c.amount, 0)
     const contribTotal = infaq + infaqDesa + fixedTotal
     const expenseTotal = exps.reduce((s, e) => s + e.amount, 0)
     const totalKebutuhan = contribTotal + expenseTotal
@@ -64,7 +71,7 @@ export async function getPeriodBudgets(periodId: string): Promise<UserBudget[]> 
       income,
       infaq,
       infaqDesa,
-      contributions: contribs.map((c) => ({ id: c.id, category: c.category, amount: c.amount })),
+      contributions: fixedContribs.map((c) => ({ id: c.id, category: c.category, amount: c.amount })),
       expenses: exps.map((e) => ({ id: e.id, name: e.name, amount: e.amount, category: e.category })),
       contribTotal,
       expenseTotal,
