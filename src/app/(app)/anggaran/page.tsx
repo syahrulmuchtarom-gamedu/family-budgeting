@@ -52,7 +52,7 @@ function BudgetColumn({ periodId, budget }: { periodId: string; budget: UserBudg
       {/* Otomatis */}
       <div className="mb-4 rounded-xl bg-emerald-50 p-3">
         <p className="mb-1 text-xs font-semibold uppercase text-emerald-700">Otomatis</p>
-        <Row label="Infaq Rejeki (5%)" value={formatRupiah(budget.infaq)} />
+        <Row label="Infaq Rejeki" value={formatRupiah(budget.infaq)} />
         <div className="flex items-center justify-between py-2 text-sm">
           <span className="text-slate-600">10% Infaq Desa</span>
           <span className="font-medium text-slate-800">{formatRupiah(budget.infaqDesa)}</span>
